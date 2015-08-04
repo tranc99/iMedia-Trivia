@@ -10,11 +10,11 @@ import UIKit
 
 class SearchResultsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, APIControllerProtocol {
     
-    let api = APIController()
+    //var api = APIController(delegate: self)
     
     @IBOutlet var appsTableView: UITableView!
     
-    var tableData = []
+    var albums = [Album]()
     
     let kCellIdentifier: String = "SearchResultCell"
     
@@ -25,7 +25,8 @@ class SearchResultsViewController: UIViewController, UITableViewDataSource, UITa
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        api.delegate = self
+        var api = APIController(delegate: self)
+        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
         api.searchItunesFor("Angry Birds")
     }
 
@@ -36,78 +37,52 @@ class SearchResultsViewController: UIViewController, UITableViewDataSource, UITa
 
     // UITableViewDataSource methods
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableData.count
+        return albums.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell: UITableViewCell = tableView.dequeueReusableCellWithIdentifier(kCellIdentifier) as! UITableViewCell
+        let album = self.albums[indexPath.row]
         
+        cell.detailTextLabel?.text =  album.price
+        cell.textLabel?.text = album.title
+        cell.imageView?.image = UIImage(named: "Blank52.jpg")
         
-        if let rowData: NSDictionary = self.tableData[indexPath.row] as? NSDictionary,
-            urlString = rowData["artworkUrl60"] as? String,
-            imgURL = NSURL(string: urlString),
-            formattedPrice = rowData["formattedPrice"] as? String,
-            imgData = NSData(contentsOfURL: imgURL),
-            trackName = rowData["trackName"] as? String {
-                cell.detailTextLabel?.text = formattedPrice
-                cell.imageView?.image = UIImage(data: imgData)
-                cell.textLabel?.text = trackName
-                
-                cell.imageView?.image = UIImage(named: "Blank52")
-                
-                if let img = imageCache[urlString] {
-                    cell.imageView?.image = img
+        let thumbnailURLString = album.thumbnailImageURL
+        let thumbnailURL = NSURL(string: thumbnailURLString)
+        
+        // if this image is already cached, don't redownload
+        if let img = imageCache[thumbnailURLString] {
+            cell.imageView?.image = img
+        } else {
+            // the image isn't cached, download
+            let request: NSURLRequest = NSURLRequest(URL: thumbnailURL!)
+            let mainQueue = NSOperationQueue.mainQueue()
+            NSURLConnection.sendAsynchronousRequest(request, queue: mainQueue, completionHandler: { (response, data, error) -> Void in 
+                if error == nil {
+                    let image = UIImage(data: data)
+                    self.imageCache[thumbnailURLString] = image
+                    dispatch_async(dispatch_get_main_queue(), {
+                        if let cellToUpdate = tableView.cellForRowAtIndexPath(indexPath) {
+                            cellToUpdate.imageView?.image = image
+                        }
+                    })
                 }
                 else {
-                    let request: NSURLRequest = NSURLRequest(URL: imgURL)
-                    let mainQueue = NSOperationQueue.mainQueue()
-                    NSURLConnection.sendAsynchronousRequest(request, queue: mainQueue, completionHandler: { (response, data, error) -> Void in
-                        if error == nil {
-                            let image = UIImage(data: data)
-                            self.imageCache[urlString] = image
-                            dispatch_async(dispatch_get_main_queue(), {
-                                if let cellToUpdate = tableView.cellForRowAtIndexPath(indexPath) {
-                                    cellToUpdate.imageView?.image = image
-                                }
-                            })
-                            
-                        }
-                        else {
-                            println("Error: \(error.localizedDescription)")
-                        }
-                    
-                    
-                    })
-                    
-                    
+                    println("Error: \(error.localizedDescription)")
                 }
+                
+            })
         }
-        
         return cell
-        
     }
-        //cell.textLabel?.text = "Row #\(indexPath.row)"
-        //cell.detailTextLabel?.text = "Subtitle #\(indexPath.row)"
-    
-
+        
     func didReceiveAPIResults(results: NSArray) {
         dispatch_async(dispatch_get_main_queue(), {
-            self.tableData = results
+            self.albums = Album.albumWithJSON(results)
             self.appsTableView!.reloadData()
+            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
         })
-    }
-
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        // Get the row data for the selected row
-        if let rowData = self.tableData[indexPath.row] as? NSDictionary,
-            // Get the name of the track for this row
-            name = rowData["trackName"] as? String,
-            // Get the price of the track on this row
-            formattedPrice = rowData["formattedPrice"] as? String {
-                let alert = UIAlertController(title: name, message: formattedPrice, preferredStyle: .Alert)
-                alert.addAction(UIAlertAction(title: "Ok", style: .Default, handler: nil))
-                self.presentViewController(alert, animated: true, completion: nil)
-        }
     }
     
     
