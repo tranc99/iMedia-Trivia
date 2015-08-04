@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1035B7111B710A6B003802C1 /* Album.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1035B7101B710A6B003802C1 /* Album.swift */; };
+		1035B7131B71161C003802C1 /* DetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1035B7121B71161C003802C1 /* DetailsViewController.swift */; };
 		1068CBE91B6F8CE50027A661 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1068CBE81B6F8CE50027A661 /* AppDelegate.swift */; };
 		1068CBEB1B6F8CE50027A661 /* SearchResultsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1068CBEA1B6F8CE50027A661 /* SearchResultsViewController.swift */; };
 		1068CBEE1B6F8CE50027A661 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1068CBEC1B6F8CE50027A661 /* Main.storyboard */; };
@@ -29,6 +30,7 @@
 
 /* Begin PBXFileReference section */
 		1035B7101B710A6B003802C1 /* Album.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Album.swift; sourceTree = "<group>"; };
+		1035B7121B71161C003802C1 /* DetailsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailsViewController.swift; sourceTree = "<group>"; };
 		1068CBE31B6F8CE50027A661 /* Hello.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hello.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1068CBE71B6F8CE50027A661 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1068CBE81B6F8CE50027A661 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -89,6 +91,7 @@
 				1068CBEF1B6F8CE50027A661 /* Images.xcassets */,
 				1068CBF11B6F8CE50027A661 /* LaunchScreen.xib */,
 				1068CBE61B6F8CE50027A661 /* Supporting Files */,
+				1035B7121B71161C003802C1 /* DetailsViewController.swift */,
 			);
 			path = Hello;
 			sourceTree = "<group>";
@@ -222,6 +225,7 @@
 				1068CBE91B6F8CE50027A661 /* AppDelegate.swift in Sources */,
 				10F3BBAC1B6FC35900B0C1A4 /* APIController.swift in Sources */,
 				1035B7111B710A6B003802C1 /* Album.swift in Sources */,
+				1035B7131B71161C003802C1 /* DetailsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
