@@ -16,6 +16,9 @@ class SearchResultsViewController: UIViewController, UITableViewDataSource, UITa
     
     var tableData = []
     
+    let kCellIdentifier: String = "SearchResultCell"
+    
+    var imageCache = [String:UIImage]()
     
     
     
@@ -23,7 +26,7 @@ class SearchResultsViewController: UIViewController, UITableViewDataSource, UITa
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         api.delegate = self
-        api.searchItunesFor("Michael Jackson")
+        api.searchItunesFor("Angry Birds")
     }
 
     override func didReceiveMemoryWarning() {
@@ -37,7 +40,7 @@ class SearchResultsViewController: UIViewController, UITableViewDataSource, UITa
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell: UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "MyTestCell")
+        let cell: UITableViewCell = tableView.dequeueReusableCellWithIdentifier(kCellIdentifier) as! UITableViewCell
         
         
         if let rowData: NSDictionary = self.tableData[indexPath.row] as? NSDictionary,
@@ -49,6 +52,35 @@ class SearchResultsViewController: UIViewController, UITableViewDataSource, UITa
                 cell.detailTextLabel?.text = formattedPrice
                 cell.imageView?.image = UIImage(data: imgData)
                 cell.textLabel?.text = trackName
+                
+                cell.imageView?.image = UIImage(named: "Blank52")
+                
+                if let img = imageCache[urlString] {
+                    cell.imageView?.image = img
+                }
+                else {
+                    let request: NSURLRequest = NSURLRequest(URL: imgURL)
+                    let mainQueue = NSOperationQueue.mainQueue()
+                    NSURLConnection.sendAsynchronousRequest(request, queue: mainQueue, completionHandler: { (response, data, error) -> Void in
+                        if error == nil {
+                            let image = UIImage(data: data)
+                            self.imageCache[urlString] = image
+                            dispatch_async(dispatch_get_main_queue(), {
+                                if let cellToUpdate = tableView.cellForRowAtIndexPath(indexPath) {
+                                    cellToUpdate.imageView?.image = image
+                                }
+                            })
+                            
+                        }
+                        else {
+                            println("Error: \(error.localizedDescription)")
+                        }
+                    
+                    
+                    })
+                    
+                    
+                }
         }
         
         return cell
@@ -65,5 +97,19 @@ class SearchResultsViewController: UIViewController, UITableViewDataSource, UITa
         })
     }
 
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        // Get the row data for the selected row
+        if let rowData = self.tableData[indexPath.row] as? NSDictionary,
+            // Get the name of the track for this row
+            name = rowData["trackName"] as? String,
+            // Get the price of the track on this row
+            formattedPrice = rowData["formattedPrice"] as? String {
+                let alert = UIAlertController(title: name, message: formattedPrice, preferredStyle: .Alert)
+                alert.addAction(UIAlertAction(title: "Ok", style: .Default, handler: nil))
+                self.presentViewController(alert, animated: true, completion: nil)
+        }
+    }
+    
+    
 }
 
