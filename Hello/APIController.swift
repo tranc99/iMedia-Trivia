@@ -57,4 +57,36 @@ class APIController {
         }
     }
     
+    func get(path: String) {
+        
+        let url = NSURL(string: path)
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithURL(url!, completionHandler: {data, response, error -> Void in
+            println("Task completed")
+            if(error != nil) {
+                // If there is an error in the web request, print it to the console
+                println(error.localizedDescription)
+            }
+            var err: NSError?
+            
+            if let var jsonResult = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.MutableContainers, error: &err) as? NSDictionary {
+                if(err != nil) {
+                    // If there is an error parsing JSON, print it to the console
+                    println("JSON Error \(err!.localizedDescription)")
+                }
+                
+                if let results: NSArray = jsonResult["results"] as? NSArray {
+                    self.delegate.didReceiveAPIResults(results)
+                }
+            }
+            
+        })
+        
+        task.resume()
+    }
+    
+    func lookupAlbum(collectionId: Int) {
+        get("https://itunes.apple.com/lookup?id=\(collectionId)&entity=song")
+    }
+    
 }
